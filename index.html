@@ -1,0 +1,920 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UsedMart</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f4f7ff;color:#222}
+
+#authPage{
+min-height:100vh;display:flex;align-items:center;
+justify-content:center;background:#dbeafe;padding:20px
+}
+.auth-box{
+background:white;width:360px;padding:30px;border-radius:15px;
+box-shadow:0 5px 20px #0002;text-align:center
+}
+.auth-box h1{color:#2563eb;margin-bottom:12px}
+.auth-box p{margin:15px 0;color:#666}
+.auth-box input{
+width:100%;padding:12px;margin:9px 0;
+border:1px solid #ccc;border-radius:6px
+}
+.tabs{display:flex;gap:10px;margin:20px 0}
+.tabs button{flex:1;background:#dbeafe;color:#2563eb}
+.tabs button.active{background:#2563eb;color:white}
+
+button,.btn{
+background:#2563eb;color:white;padding:12px 20px;
+border:0;border-radius:6px;cursor:pointer;margin:5px
+}
+button:hover,.btn:hover{background:#1d4ed8}
+.primary{width:100%;margin-top:12px}
+
+header{
+background:#2563eb;color:white;padding:20px 6%;
+display:flex;justify-content:space-between;
+align-items:center;flex-wrap:wrap;gap:15px
+}
+nav a{
+color:white;text-decoration:none;margin:0 9px;
+font-weight:bold;cursor:pointer
+}
+nav a:hover{color:#bfdbfe}
+
+.page{display:none}
+.page.active{display:block}
+
+.hero{
+text-align:center;padding:75px 20px;background:#dbeafe
+}
+.hero h1{font-size:36px;margin-bottom:15px}
+.hero p{margin-bottom:20px}
+
+.container{
+width:90%;max-width:1200px;margin:40px auto;text-align:center
+}
+.container h1,.container h2{margin-bottom:20px}
+
+#searchInput{
+width:80%;max-width:500px;padding:13px;margin:15px;
+border:1px solid #ccc;border-radius:7px
+}
+
+.products{
+display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+gap:25px;padding:20px
+}
+.product-card{
+background:white;border-radius:12px;padding:15px;
+box-shadow:0 4px 12px #0002;text-align:center
+}
+.product-card:hover{transform:translateY(-4px)}
+.product-image{
+width:100%;height:200px;object-fit:cover;
+border-radius:8px;margin-bottom:12px
+}
+.product-card h3{margin:10px 0}
+.product-card p{margin:8px 0;color:#555}
+.product-price{color:#2563eb!important;font-size:19px;font-weight:bold}
+
+form.box{
+max-width:550px;margin:auto;background:white;padding:25px;
+border-radius:12px;box-shadow:0 3px 12px #0002
+}
+form.box input,form.box select,form.box textarea{
+width:100%;padding:13px;margin:10px 0;
+border:1px solid #ccc;border-radius:6px;font-size:15px
+}
+form.box textarea{height:90px;resize:vertical}
+form.box button{width:100%}
+
+#message{margin:15px;font-weight:bold}
+
+.order-card{
+max-width:650px;margin:25px auto;background:white;
+padding:30px;border-radius:12px;text-align:left;
+box-shadow:0 4px 15px #0002
+}
+.order-card h2{color:#2563eb;text-align:center;margin-bottom:20px}
+.order-card p{padding:9px 0;border-bottom:1px solid #eee}
+.order-id{color:#087f5b;font-weight:bold;font-size:19px}
+.success{text-align:center;color:#087f5b;font-size:18px;margin:15px}
+
+@media(max-width:700px){
+.products{grid-template-columns:repeat(2,1fr);gap:12px;padding:10px}
+header{flex-direction:column}
+.hero h1{font-size:27px}
+}
+@media(max-width:450px){
+.products{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN AND REGISTER -->
+
+<section id="authPage">
+<div class="auth-box">
+
+<h1>♻ UsedMart</h1>
+<p>Buy and Sell Used Products</p>
+
+<div class="tabs">
+<button id="loginTab" class="active" onclick="switchAuth('login')">Login</button>
+<button id="registerTab" onclick="switchAuth('register')">Register</button>
+</div>
+
+<form id="loginForm">
+<input type="email" id="loginEmail" placeholder="Enter Email" required>
+<input type="password" id="loginPassword" placeholder="Enter Password" required>
+<button class="primary" type="submit">Login</button>
+</form>
+
+<form id="registerForm" style="display:none">
+<input type="text" id="regName" placeholder="Full Name" required>
+<input type="email" id="regEmail" placeholder="Email Address" required>
+<input type="password" id="regPassword" placeholder="Create Password (min 6 characters)" minlength="6" required>
+<input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+<button class="primary" type="submit">Create Account</button>
+</form>
+
+<p id="authMessage"></p>
+</div>
+</section>
+
+
+<!-- MAIN WEBSITE -->
+
+<div id="mainWebsite" style="display:none">
+
+<header>
+<h2>♻ UsedMart</h2>
+<nav>
+<a onclick="showPage('homePage')">Home</a>
+<a onclick="showPage('buyPage')">Buy Products</a>
+<a onclick="showPage('sellPage')">Sell Product</a>
+<a onclick="showPage('ordersPage')">My Orders</a>
+<a onclick="logout()">Logout</a>
+</nav>
+</header>
+
+
+<!-- HOME -->
+
+<section id="homePage" class="page active">
+
+<div class="hero">
+<h1>Buy and Sell Used Products</h1>
+<p>Give old products a new life!</p>
+<button onclick="showPage('buyPage')">Explore Products</button>
+<button onclick="showPage('sellPage')">Sell an Item</button>
+</div>
+
+<div class="container">
+<h2>Welcome to UsedMart</h2>
+<p>Buy affordable second-hand products or sell your unused items easily.</p>
+<div id="homeProducts" class="products"></div>
+</div>
+</section>
+
+
+<!-- BUY PAGE -->
+
+<section id="buyPage" class="page">
+<div class="container">
+<h1>Buy Used Products</h1>
+<input type="text" id="searchInput"
+placeholder="Search products..." oninput="renderBuy()">
+<div id="buyProducts" class="products"></div>
+</div>
+</section>
+
+
+<!-- SELL PAGE -->
+
+<section id="sellPage" class="page">
+<div class="container">
+<h1>Sell Your Product</h1>
+
+<form id="sellForm" class="box">
+
+<input type="text" id="productName" placeholder="Product Name" required>
+
+<input type="number" id="productPrice" placeholder="Price in Rupees" min="1" required>
+
+<select id="productCategory" required>
+<option value="">Select Category</option>
+<option>Electronics</option>
+<option>Furniture</option>
+<option>Books</option>
+<option>Fashion</option>
+<option>Accessories</option>
+<option>Other</option>
+</select>
+
+<select id="productCondition" required>
+<option value="">Select Condition</option>
+<option>Like New</option>
+<option>Good</option>
+<option>Fair</option>
+</select>
+
+<input type="url" id="productImage" placeholder="Product Image URL (optional)">
+
+<textarea id="productDescription" placeholder="Product Description" required></textarea>
+
+<button type="submit">List Product for Sale</button>
+</form>
+
+<p id="message"></p>
+</div>
+</section>
+
+
+<!-- CHECKOUT PAGE -->
+
+<section id="checkoutPage" class="page">
+<div class="container">
+
+<h1>Customer Details</h1>
+<p>Enter your details to place the order.</p>
+
+<div id="checkoutProduct"></div>
+
+<form id="checkoutForm" class="box">
+
+<h2>Delivery Information</h2>
+
+<input type="text" id="customerName"
+placeholder="Customer Name" required>
+
+<textarea id="customerAddress"
+placeholder="Full Delivery Address" required></textarea>
+
+<input type="tel" id="customerPhone"
+placeholder="Phone Number (10 digits)"
+pattern="[0-9]{10}" maxlength="10" required>
+
+<h2 style="margin-top:20px">Payment Method</h2>
+
+<select id="paymentMethod" required>
+<option value="">Select Payment Method</option>
+<option value="Cash on Delivery">Cash on Delivery</option>
+<option value="UPI">UPI</option>
+<option value="Debit Card">Debit Card</option>
+<option value="Credit Card">Credit Card</option>
+</select>
+
+<p style="color:#666;font-size:13px">
+Demo website: Online payment methods are selection options only.
+</p>
+
+<button type="submit">Place Order</button>
+
+<button type="button" onclick="showPage('buyPage')"
+style="background:#64748b">Cancel</button>
+
+</form>
+</div>
+</section>
+
+
+<!-- ORDER CONFIRMATION -->
+
+<section id="confirmationPage" class="page">
+<div class="container">
+
+<h1>Order Confirmation</h1>
+
+<p class="success">✓ Your Order Has Been Placed Successfully!</p>
+
+<div id="orderDetails" class="order-card"></div>
+
+<button onclick="showPage('buyPage')">Continue Shopping</button>
+<button onclick="showPage('ordersPage')">View My Orders</button>
+
+</div>
+</section>
+
+
+<!-- MY ORDERS -->
+
+<section id="ordersPage" class="page">
+<div class="container">
+
+<h1>My Orders</h1>
+<div id="myOrders"></div>
+
+</div>
+</section>
+
+</div>
+
+
+<script>
+
+// STORAGE
+
+const usersKey="usedmartUsers";
+const productKey="usedmartProducts";
+const ordersKey="usedmartOrders";
+
+let selectedProduct=null;
+
+
+// AUTHENTICATION
+
+function getUsers(){
+try{return JSON.parse(localStorage.getItem(usersKey))||[]}
+catch(e){return []}
+}
+
+function switchAuth(type){
+
+document.getElementById("loginForm").style.display=
+type==="login"?"block":"none";
+
+document.getElementById("registerForm").style.display=
+type==="register"?"block":"none";
+
+document.getElementById("loginTab").classList.toggle("active",type==="login");
+document.getElementById("registerTab").classList.toggle("active",type==="register");
+
+document.getElementById("authMessage").textContent="";
+
+}
+
+
+// REGISTER
+
+document.getElementById("registerForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const name=document.getElementById("regName").value.trim();
+const email=document.getElementById("regEmail").value.trim().toLowerCase();
+const password=document.getElementById("regPassword").value;
+const confirm=document.getElementById("confirmPassword").value;
+
+const msg=document.getElementById("authMessage");
+
+if(password!==confirm){
+msg.style.color="red";
+msg.textContent="Passwords do not match!";
+return;
+}
+
+let users=getUsers();
+
+if(users.some(u=>u.email===email)){
+msg.style.color="red";
+msg.textContent="Email already registered. Please login.";
+return;
+}
+
+users.push({name,email,password});
+
+localStorage.setItem(usersKey,JSON.stringify(users));
+
+msg.style.color="green";
+msg.textContent="Registration successful! Please login.";
+
+this.reset();
+
+setTimeout(()=>{
+switchAuth("login");
+document.getElementById("loginEmail").value=email;
+},1000);
+
+});
+
+
+// LOGIN
+
+document.getElementById("loginForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+const password=document.getElementById("loginPassword").value;
+
+const user=getUsers().find(u=>u.email===email&&u.password===password);
+
+if(user){
+
+sessionStorage.setItem("usedmartLoggedIn","yes");
+sessionStorage.setItem("usedmartCurrentUser",user.email);
+
+openWebsite();
+
+}else{
+
+const msg=document.getElementById("authMessage");
+msg.style.color="red";
+msg.textContent="Invalid email or password!";
+
+}
+
+});
+
+
+// OPEN WEBSITE
+
+function openWebsite(){
+
+document.getElementById("authPage").style.display="none";
+document.getElementById("mainWebsite").style.display="block";
+
+renderHome();
+renderBuy();
+
+}
+
+
+// LOGOUT
+
+function logout(){
+
+sessionStorage.clear();
+
+document.getElementById("mainWebsite").style.display="none";
+document.getElementById("authPage").style.display="flex";
+
+document.getElementById("loginForm").reset();
+
+switchAuth("login");
+
+}
+
+
+// NAVIGATION
+
+function showPage(id){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active");
+});
+
+document.getElementById(id).classList.add("active");
+
+if(id==="homePage")renderHome();
+if(id==="buyPage")renderBuy();
+if(id==="ordersPage")renderOrders();
+
+}
+
+
+// DEFAULT PRODUCTS
+
+const defaultProducts=[
+
+{
+id:1,name:"Wireless Headphones",price:850,
+category:"Electronics",condition:"Good",
+image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
+description:"Good quality wireless headphones"
+},
+
+{
+id:2,name:"Laptop",price:15000,
+category:"Electronics",condition:"Good",
+image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500",
+description:"Laptop in good working condition"
+},
+
+{
+id:3,name:"Wrist Watch",price:1200,
+category:"Accessories",condition:"Like New",
+image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
+description:"Stylish wrist watch"
+},
+
+{
+id:4,name:"Casual Shoes",price:900,
+category:"Fashion",condition:"Good",
+image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
+description:"Comfortable casual shoes"
+},
+
+{
+id:5,name:"Backpack",price:600,
+category:"Accessories",condition:"Good",
+image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500",
+description:"Useful backpack for college"
+}
+
+];
+
+
+// PRODUCTS
+
+function getProducts(){
+
+try{
+const saved=localStorage.getItem(productKey);
+if(saved!==null){
+const data=JSON.parse(saved);
+if(Array.isArray(data))return data;
+}
+}catch(e){}
+
+localStorage.setItem(productKey,JSON.stringify(defaultProducts));
+return defaultProducts.map(p=>({...p}));
+
+}
+
+function saveProducts(products){
+localStorage.setItem(productKey,JSON.stringify(products));
+}
+
+
+// PRODUCT CARD
+
+function createCard(product){
+
+const card=document.createElement("div");
+card.className="product-card";
+
+const img=document.createElement("img");
+img.className="product-image";
+img.src=product.image||"https://placehold.co/500x350?text=Product";
+img.alt=product.name;
+
+img.onerror=function(){
+this.onerror=null;
+this.src="https://placehold.co/500x350?text=Product";
+};
+
+const name=document.createElement("h3");
+name.textContent=product.name;
+
+const price=document.createElement("p");
+price.className="product-price";
+price.textContent="₹"+Number(product.price).toLocaleString("en-IN");
+
+const category=document.createElement("p");
+category.textContent="Category: "+product.category;
+
+const condition=document.createElement("p");
+condition.textContent="Condition: "+product.condition;
+
+const description=document.createElement("p");
+description.textContent=product.description||"";
+
+const btn=document.createElement("button");
+btn.textContent="Buy Now";
+
+btn.onclick=function(){
+openCheckout(product.id);
+};
+
+card.append(img,name,price,category,condition,description,btn);
+
+return card;
+
+}
+
+
+// BUY PAGE
+
+function renderBuy(){
+
+const container=document.getElementById("buyProducts");
+container.replaceChildren();
+
+const search=document.getElementById("searchInput").value.toLowerCase().trim();
+
+const filtered=getProducts().filter(p=>
+p.name.toLowerCase().includes(search)||
+(p.category||"").toLowerCase().includes(search)
+);
+
+if(filtered.length===0){
+container.textContent="No products available.";
+return;
+}
+
+filtered.forEach(p=>container.appendChild(createCard(p)));
+
+}
+
+
+// HOME PAGE
+
+function renderHome(){
+
+const container=document.getElementById("homeProducts");
+container.replaceChildren();
+
+getProducts().slice(0,5).forEach(p=>{
+container.appendChild(createCard(p));
+});
+
+}
+
+
+// SELL PRODUCT
+
+document.getElementById("sellForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const price=Number(document.getElementById("productPrice").value);
+
+if(!Number.isFinite(price)||price<=0){
+document.getElementById("message").textContent="Enter a valid price!";
+return;
+}
+
+const products=getProducts();
+
+const newProduct={
+
+id:Date.now(),
+name:document.getElementById("productName").value.trim(),
+price:price,
+category:document.getElementById("productCategory").value,
+condition:document.getElementById("productCondition").value,
+image:document.getElementById("productImage").value.trim()||
+"https://placehold.co/500x350?text=Product",
+description:document.getElementById("productDescription").value.trim()
+
+};
+
+products.unshift(newProduct);
+saveProducts(products);
+
+document.getElementById("message").style.color="green";
+document.getElementById("message").textContent="Product listed successfully!";
+
+this.reset();
+
+renderBuy();
+renderHome();
+
+});
+
+
+// OPEN CHECKOUT
+
+function openCheckout(productId){
+
+const product=getProducts().find(p=>p.id===productId);
+
+if(!product){
+alert("Product is no longer available!");
+renderBuy();
+return;
+}
+
+selectedProduct=product;
+
+const container=document.getElementById("checkoutProduct");
+container.innerHTML="";
+
+const card=createCard(product);
+container.appendChild(card);
+
+// Pre-fill registered customer's name and email-associated profile
+
+const email=sessionStorage.getItem("usedmartCurrentUser");
+const user=getUsers().find(u=>u.email===email);
+
+if(user){
+document.getElementById("customerName").value=user.name;
+}else{
+document.getElementById("customerName").value="";
+}
+
+document.getElementById("checkoutForm").reset();
+
+if(user){
+document.getElementById("customerName").value=user.name;
+}
+
+showPage("checkoutPage");
+
+}
+
+
+// PLACE ORDER
+
+document.getElementById("checkoutForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+if(!selectedProduct){
+alert("Please select a product!");
+return;
+}
+
+// Check product is still available
+
+const products=getProducts();
+
+const currentProduct=products.find(p=>p.id===selectedProduct.id);
+
+if(!currentProduct){
+alert("Sorry! This product has already been sold.");
+selectedProduct=null;
+showPage("buyPage");
+return;
+}
+
+const customerName=document.getElementById("customerName").value.trim();
+const address=document.getElementById("customerAddress").value.trim();
+const phone=document.getElementById("customerPhone").value.trim();
+const payment=document.getElementById("paymentMethod").value;
+
+if(!/^[0-9]{10}$/.test(phone)){
+alert("Enter a valid 10-digit phone number!");
+return;
+}
+
+// Generate unique order ID
+
+const orderId="UM"+Date.now().toString().slice(-10);
+
+const order={
+
+orderId:orderId,
+
+customerEmail:sessionStorage.getItem("usedmartCurrentUser"),
+
+customerName:customerName,
+
+address:address,
+
+phone:phone,
+
+payment:payment,
+
+productName:currentProduct.name,
+
+productPrice:currentProduct.price,
+
+productImage:currentProduct.image,
+
+orderDate:new Date().toLocaleString("en-IN")
+
+};
+
+// Save order
+
+let orders=[];
+
+try{
+orders=JSON.parse(localStorage.getItem(ordersKey))||[];
+}catch(e){}
+
+orders.unshift(order);
+
+localStorage.setItem(ordersKey,JSON.stringify(orders));
+
+// REMOVE PURCHASED PRODUCT
+
+const remainingProducts=products.filter(p=>p.id!==currentProduct.id);
+
+saveProducts(remainingProducts);
+
+// Show confirmation
+
+displayOrder(order);
+
+selectedProduct=null;
+
+document.getElementById("checkoutForm").reset();
+
+showPage("confirmationPage");
+
+});
+
+
+// ORDER CONFIRMATION
+
+function displayOrder(order){
+
+const details=document.getElementById("orderDetails");
+
+details.innerHTML="";
+
+const heading=document.createElement("h2");
+heading.textContent="✓ Order Confirmed";
+
+const fields=[
+
+["Order ID",order.orderId],
+["Order Date",order.orderDate],
+["Customer Name",order.customerName],
+["Delivery Address",order.address],
+["Phone Number",order.phone],
+["Product",order.productName],
+["Total Amount","₹"+Number(order.productPrice).toLocaleString("en-IN")],
+["Payment Method",order.payment],
+["Order Status","Placed Successfully"]
+
+];
+
+details.appendChild(heading);
+
+const id=document.createElement("p");
+id.className="order-id";
+id.textContent="Order ID: "+order.orderId;
+details.appendChild(id);
+
+fields.slice(1).forEach(([label,value])=>{
+
+const p=document.createElement("p");
+const strong=document.createElement("strong");
+strong.textContent=label+": ";
+
+p.appendChild(strong);
+p.appendChild(document.createTextNode(value));
+
+details.appendChild(p);
+
+});
+
+}
+
+
+// MY ORDERS
+
+function renderOrders(){
+
+const container=document.getElementById("myOrders");
+container.replaceChildren();
+
+const email=sessionStorage.getItem("usedmartCurrentUser");
+
+let orders=[];
+
+try{
+orders=JSON.parse(localStorage.getItem(ordersKey))||[];
+}catch(e){}
+
+const userOrders=orders.filter(o=>o.customerEmail===email);
+
+if(userOrders.length===0){
+container.textContent="You have not placed any orders yet.";
+return;
+}
+
+userOrders.forEach(order=>{
+
+const card=document.createElement("div");
+card.className="order-card";
+
+const title=document.createElement("h2");
+title.textContent="Order Details";
+
+card.appendChild(title);
+
+const fields=[
+["Order ID",order.orderId],
+["Customer Name",order.customerName],
+["Product",order.productName],
+["Amount","₹"+Number(order.productPrice).toLocaleString("en-IN")],
+["Payment",order.payment],
+["Phone",order.phone],
+["Address",order.address],
+["Date",order.orderDate],
+["Status","Placed Successfully"]
+];
+
+fields.forEach(([label,value])=>{
+
+const p=document.createElement("p");
+const b=document.createElement("strong");
+
+b.textContent=label+": ";
+p.append(b,document.createTextNode(value));
+
+card.appendChild(p);
+
+});
+
+container.appendChild(card);
+
+});
+
+}
+
+
+// INITIALIZE
+
+if(sessionStorage.getItem("usedmartLoggedIn")==="yes"){
+openWebsite();
+}
+
+</script>
+
+</body>
+</html>
